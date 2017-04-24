@@ -1,0 +1,4 @@
+com\adssets\scout24\validation\Validation.class
+com\adssets\servlet\FeedServlet.class
+com\adssets\servlet\MarketServlet.class
+com\adssets\scout24\validation\GetAppartment.class

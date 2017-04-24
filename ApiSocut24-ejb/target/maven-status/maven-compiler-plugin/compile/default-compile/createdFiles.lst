@@ -1,0 +1,16 @@
+com\adssets\api\NewSessionBeanLocal.class
+com\adssets\api\Scout24Local.class
+com\adssets\facades\FeedFacadeLocal.class
+com\adssets\model\Feed_.class
+com\adssets\facades\MarketFacadeLocal.class
+com\adssets\model\Market.class
+com\adssets\model\Feed.class
+com\adssets\facades\FeedFacade.class
+com\adssets\facades\AbstractFacade.class
+com\adssets\NewSessionBean.class
+com\adssets\model\Market_.class
+com\adssets\api\Scout24.class
+com\adssets\ejb\DataAccess.class
+com\adssets\api\NewSessionBean.class
+com\adssets\ejb\DataAccessLocal.class
+com\adssets\facades\MarketFacade.class
