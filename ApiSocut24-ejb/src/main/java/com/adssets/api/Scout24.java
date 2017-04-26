@@ -146,7 +146,27 @@ public class Scout24 implements Scout24Local {
                     try {
                         
                         JSONObject outObj = XML.toJSONObject(sb.toString());
-                        return outObj.toString();
+                        
+                        JSONObject objPrice = new JSONObject();
+                        JSONObject objTitlePicture = new JSONObject();
+                        JSONObject objAddress = new JSONObject();
+                        Object objLivingSpace = new Object();
+                        JSONObject obj = new JSONObject();
+                       
+                        System.out.println(outObj);
+                        
+                        objPrice = outObj.getJSONObject("expose:expose").getJSONObject("realEstate").getJSONObject("price");
+                        objTitlePicture = outObj.getJSONObject("expose:expose").getJSONObject("realEstate").getJSONObject("titlePicture");
+                        objAddress = outObj.getJSONObject("expose:expose").getJSONObject("realEstate").getJSONObject("address");
+                        objLivingSpace = outObj.getJSONObject("expose:expose").getJSONObject("realEstate").get("livingSpace");
+
+                        obj.put("price", objPrice);
+                        obj.put("pictures", objTitlePicture);
+                        obj.put("address", objAddress);
+                        obj.put("livingspace", objLivingSpace);
+                            
+                        
+                        return obj.toString();
                     }catch(JSONException je){
                         je.printStackTrace();
                         return "{\"error\":2}";

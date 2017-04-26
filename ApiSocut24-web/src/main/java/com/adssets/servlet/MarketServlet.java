@@ -39,11 +39,14 @@ public class MarketServlet extends HttpServlet {
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        response.setContentType("text/html;charset=UTF-8");
+        response.setContentType("application/json");
         try (PrintWriter out = response.getWriter()) {
-            
-            out.println(data.getMarket());
-            
+            String marketId = request.getParameter("marketId");
+            if(marketId == null){
+            out.println(data.getMarkets());
+            }else{
+            out.println(data.getMarketByID(marketId));    
+            }
         }
     }
 
@@ -59,6 +62,8 @@ public class MarketServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        HttpServletResponse http = (HttpServletResponse) response;
+        response.setHeader("Access-Control-Allow-Origin", "*");
         processRequest(request, response);
     }
 
@@ -73,7 +78,7 @@ public class MarketServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        
+        response.setHeader("Access-Control-Allow-Origin", "*");;
         try (PrintWriter out = response.getWriter()) {
         StringBuilder sb = new StringBuilder();
             String line = null;

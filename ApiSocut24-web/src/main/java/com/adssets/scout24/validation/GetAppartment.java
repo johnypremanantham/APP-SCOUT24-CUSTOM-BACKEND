@@ -39,6 +39,8 @@ public class GetAppartment extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/json;charset=UTF-8");
+        response.setHeader("Access-Control-Allow-Origin", "*");
+
         try (PrintWriter out = response.getWriter()) {
            
             String strPin = request.getParameter("pin");

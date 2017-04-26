@@ -38,7 +38,7 @@ public class DataAccess implements DataAccessLocal {
 
 //-----------------MARKET FUNCTIONALITY---------------------------
     @Override
-    public String getMarket() {
+    public String getMarkets() {
         JsonArray jsonArray = new JsonArray();
 
         List<Market> markets = marketFacade.findAll();
@@ -52,6 +52,20 @@ public class DataAccess implements DataAccessLocal {
         return jsonArray.toString();
     }
 
+        @Override
+    public String getMarketByID(String marketId) {
+        JsonArray jsonArray = new JsonArray();
+
+        Market market = marketFacade.find(Integer.valueOf(marketId));
+       
+            JsonObject obj = new JsonObject();
+            obj.addProperty("id", market.getId());
+            obj.addProperty("name", market.getName());
+            obj.addProperty("description", market.getDescription());
+            jsonArray.add(obj);
+        
+        return jsonArray.toString();
+    }
 
     @Override
     public String createMarket(String obj) {

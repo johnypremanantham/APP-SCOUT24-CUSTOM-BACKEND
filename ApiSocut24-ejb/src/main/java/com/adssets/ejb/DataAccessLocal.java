@@ -14,7 +14,9 @@ import javax.ejb.Local;
 @Local
 public interface DataAccessLocal {
     
-    String getMarket();
+    String getMarkets();
+    
+    String getMarketByID(String marketId);
     
     String createMarket(String obj);
     
