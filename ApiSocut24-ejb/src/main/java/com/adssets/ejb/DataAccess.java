@@ -186,12 +186,12 @@ public class DataAccess implements DataAccessLocal {
         JsonArray objData = new JsonArray();
         
         for (String objId : objIds) {
-            System.out.println(objId);
             String result = scout24.getAppartments(objId);
-            System.out.println(result);
+            JsonParser parser = new JsonParser();
+            JsonObject resultObj = parser.parse(result).getAsJsonObject();
+            objData.add(resultObj);
         }
-
-        return jsonArray.toString();
+        return objData.toString();
         
     }
   
