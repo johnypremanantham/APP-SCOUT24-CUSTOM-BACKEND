@@ -41,6 +41,7 @@ public class FeedServlet extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
+        response.setHeader("Access-Control-Allow-Origin", "*");
         try (PrintWriter out = response.getWriter()) {
            String marketId = request.getParameter("marketId");
            out.println(data.getFeedByMarket(marketId));
@@ -74,6 +75,7 @@ public class FeedServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        response.setHeader("Access-Control-Allow-Origin", "*");
         try (PrintWriter out = response.getWriter()) {
         StringBuilder sb = new StringBuilder();
             String line = null;

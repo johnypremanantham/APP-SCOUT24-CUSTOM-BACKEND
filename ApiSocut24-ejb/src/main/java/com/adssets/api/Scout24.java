@@ -149,19 +149,24 @@ public class Scout24 implements Scout24Local {
                         
                         JSONObject objPrice = new JSONObject();
                         JSONObject objTitlePicture = new JSONObject();
+                        JSONObject objAdPicture = new JSONObject();
                         JSONObject objAddress = new JSONObject();
                         Object objLivingSpace = new Object();
                         JSONObject obj = new JSONObject();
-                       
-                        System.out.println(outObj);
                         
+//                        System.out.println(outObj.toString());
+                                               
                         objPrice = outObj.getJSONObject("expose:expose").getJSONObject("realEstate").getJSONObject("price");
-                        objTitlePicture = outObj.getJSONObject("expose:expose").getJSONObject("realEstate").getJSONObject("titlePicture");
+                        objTitlePicture = outObj.getJSONObject("expose:expose").getJSONObject("realEstate").getJSONObject("titlePicture").getJSONObject("urls")
+                                .getJSONArray("url").getJSONObject(1);
+                        objAdPicture = outObj.getJSONObject("expose:expose").getJSONObject("realEstate").getJSONObject("titlePicture").getJSONObject("urls")
+                                .getJSONArray("url").getJSONObject(4);
                         objAddress = outObj.getJSONObject("expose:expose").getJSONObject("realEstate").getJSONObject("address");
                         objLivingSpace = outObj.getJSONObject("expose:expose").getJSONObject("realEstate").get("livingSpace");
 
                         obj.put("price", objPrice);
-                        obj.put("pictures", objTitlePicture);
+                        obj.put("titlepicture", objTitlePicture);
+                        obj.put("adpicture", objAdPicture);
                         obj.put("address", objAddress);
                         obj.put("livingspace", objLivingSpace);
                             
@@ -170,7 +175,6 @@ public class Scout24 implements Scout24Local {
                     }catch(JSONException je){
                         je.printStackTrace();
                         return "{\"error\":2}";
-
                     }
                 case 201:
                     while ((line = br.readLine()) != null) {

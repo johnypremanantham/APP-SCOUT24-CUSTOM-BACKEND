@@ -117,27 +117,39 @@ public class DataAccess implements DataAccessLocal {
         
         Market marketId = marketFacade.find(jsonObject.get("marketId").getAsInt());
         
-        Feed feedCheck = feedFacade.find(marketId.getId());
+//        Feed feedCheck = feedFacade.find(marketId);
+        List<Feed> feeds = em.createNamedQuery("Feed.findByMarketId")
+                .setParameter("marketId", marketId)
+                .getResultList();
+        Integer feedCheck = null;
+        
+        if(feeds.size() > 0){
+        feedCheck = feeds.get(0).getId();
+        }
         
         Feed feed = new Feed();
         feed.setIdmarket(marketId);
-        feed.setJson(jsonObject.get("json").toString());
+        feed.setJson(jsonObject.get("json").getAsJsonArray().toString());
         
         JsonArray jsonArray = new JsonArray();
         JsonObject jsonObj = new JsonObject();
         
         if(feedCheck == null) { 
         feedFacade.create(feed);
-        }else{
-            feed.setId(feedCheck.getId());
-            feedFacade.edit(feed);
-        }
-        
             jsonObj.addProperty("id", feed.getId());
             jsonObj.addProperty("marketId", feed.getIdmarket().getId());
             jsonObj.addProperty("json", feed.getJson());
             jsonArray.add(jsonObj);
             return jsonArray.toString();
+        }else{
+            feed.setId(feedCheck);
+            feedFacade.edit(feed);
+            jsonObj.addProperty("id", feed.getId());
+            jsonObj.addProperty("marketId", feed.getIdmarket().getId());
+            jsonObj.addProperty("json", feed.getJson());
+            jsonArray.add(jsonObj);
+            return jsonArray.toString();
+        }            
         
     }
   
