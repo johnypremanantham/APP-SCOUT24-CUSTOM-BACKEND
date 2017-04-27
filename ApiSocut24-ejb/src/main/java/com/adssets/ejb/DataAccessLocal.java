@@ -20,9 +20,11 @@ public interface DataAccessLocal {
     
     String createMarket(String obj);
     
-    String getFeedByMarket(String marketId);
+    String getObjectsByMarket(String marketId);
     
     String createFeed(String obj);
+    
+    String buildFeedForMarket(String marketId);
 
     
     

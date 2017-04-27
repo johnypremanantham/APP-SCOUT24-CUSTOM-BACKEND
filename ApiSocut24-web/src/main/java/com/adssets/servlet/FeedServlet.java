@@ -44,7 +44,7 @@ public class FeedServlet extends HttpServlet {
         response.setHeader("Access-Control-Allow-Origin", "*");
         try (PrintWriter out = response.getWriter()) {
            String marketId = request.getParameter("marketId");
-           out.println(data.getFeedByMarket(marketId));
+           out.println(data.buildFeedForMarket(marketId));
 
         }
     }
@@ -76,33 +76,33 @@ public class FeedServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setHeader("Access-Control-Allow-Origin", "*");
-        try (PrintWriter out = response.getWriter()) {
-        StringBuilder sb = new StringBuilder();
-            String line = null;
-            try {
-                BufferedReader reader = request.getReader();
-                while ((line = reader.readLine()) != null)
-                    sb.append(line);
-            } catch (Exception e) { 
-                System.out.println("com.adssets.servlet.MarketServlet.processRequestPost()" + " Could not read POST body"); 
-            }
-            
-            JsonObject jsonObject = (new JsonParser()).parse(sb.toString()).getAsJsonObject();
-            
-            if(jsonObject.has("marketId") && jsonObject.has("json")){
-                System.out.println(jsonObject.toString());
-                String res = data.createFeed(jsonObject.toString());
-                out.println(res);
-            }else{
-              System.out.println("com.adssets.servlet.MarketServlet.processRequestPost()" + " Missing fields in body"); 
-
-            }
-            
-            
-            
-           
-            
-        }
+//        try (PrintWriter out = response.getWriter()) {
+//        StringBuilder sb = new StringBuilder();
+//            String line = null;
+//            try {
+//                BufferedReader reader = request.getReader();
+//                while ((line = reader.readLine()) != null)
+//                    sb.append(line);
+//            } catch (Exception e) { 
+//                System.out.println("com.adssets.servlet.ObjectServlet.processRequestPost()" + " Could not read POST body"); 
+//            }
+//            
+//            JsonObject jsonObject = (new JsonParser()).parse(sb.toString()).getAsJsonObject();
+//            
+//            if(jsonObject.has("marketId") && jsonObject.has("json")){
+//                System.out.println(jsonObject.toString());
+//                String res = data.createFeed(jsonObject.toString());
+//                out.println(res);
+//            }else{
+//              System.out.println("com.adssets.servlet.ObjectServlet.processRequestPost()" + " Missing fields in body"); 
+//
+//            }
+//            
+//            
+//            
+//           
+//            
+//        }
     }
 
     /**

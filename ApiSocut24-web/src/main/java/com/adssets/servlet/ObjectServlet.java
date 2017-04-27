@@ -3,9 +3,12 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.adssets.scout24.validation;
+package com.adssets.servlet;
 
-import com.adssets.api.Scout24Local;
+import com.adssets.ejb.DataAccessLocal;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import javax.ejb.EJB;
@@ -17,16 +20,14 @@ import javax.servlet.http.HttpServletResponse;
 
 /**
  *
- * @author dbr
+ * @author adssets
  */
-@WebServlet(name = "GetAppartment", urlPatterns = {"/GetAppartment"})
-public class GetAppartment extends HttpServlet {
+@WebServlet(name = "Object", urlPatterns = {"/Object"})
+public class ObjectServlet extends HttpServlet {
 
     @EJB
-    private Scout24Local scout24;
+    private DataAccessLocal data;
 
-    
-    
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
      * methods.
@@ -36,31 +37,15 @@ public class GetAppartment extends HttpServlet {
      * @throws ServletException if a servlet-specific error occurs
      * @throws IOException if an I/O error occurs
      */
+    
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        response.setContentType("text/json;charset=UTF-8");
+        response.setContentType("text/html;charset=UTF-8");
         response.setHeader("Access-Control-Allow-Origin", "*");
-
         try (PrintWriter out = response.getWriter()) {
-           
-            String strPin = request.getParameter("pin");
-            
-            
-            if( strPin!=null ){
-                scout24.validatePin(strPin);
-            }
-//            92848560
-            
-            String objectId = request.getParameter("objectId");
-         
-            if(objectId == null){
-                objectId = "";
-            }
-         
-          
-            String output = scout24.getAppartments(objectId);
+           String marketId = request.getParameter("marketId");
+           out.println(data.getObjectsByMarket(marketId));
 
-            out.print(output);
         }
     }
 
@@ -90,7 +75,34 @@ public class GetAppartment extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+        response.setHeader("Access-Control-Allow-Origin", "*");
+        try (PrintWriter out = response.getWriter()) {
+        StringBuilder sb = new StringBuilder();
+            String line = null;
+            try {
+                BufferedReader reader = request.getReader();
+                while ((line = reader.readLine()) != null)
+                    sb.append(line);
+            } catch (Exception e) { 
+                System.out.println("com.adssets.servlet.ObjectServlet.processRequestPost()" + " Could not read POST body"); 
+            }
+            
+            JsonObject jsonObject = (new JsonParser()).parse(sb.toString()).getAsJsonObject();
+            
+            if(jsonObject.has("marketId") && jsonObject.has("json")){
+                System.out.println(jsonObject.toString());
+                String res = data.createFeed(jsonObject.toString());
+                out.println(res);
+            }else{
+              System.out.println("com.adssets.servlet.ObjectServlet.processRequestPost()" + " Missing fields in body"); 
+
+            }
+            
+            
+            
+           
+            
+        }
     }
 
     /**
