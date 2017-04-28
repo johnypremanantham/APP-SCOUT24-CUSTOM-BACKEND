@@ -147,6 +147,7 @@ public class Scout24 implements Scout24Local {
                         
                         JSONObject outObj = XML.toJSONObject(sb.toString());
                         
+                        
                         JSONObject objPrice = new JSONObject();
                         JSONObject objTitlePicture = new JSONObject();
                         JSONObject objAdPicture = new JSONObject();
