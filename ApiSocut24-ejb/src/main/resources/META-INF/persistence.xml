@@ -4,7 +4,15 @@
     <jta-data-source>jdbc/scout24</jta-data-source>
     <class>com.adssets.model.Feed</class>
     <class>com.adssets.model.Market</class>
-    <exclude-unlisted-classes>false</exclude-unlisted-classes>
+    <class>com.adssets.model.Config</class>
+    <exclude-unlisted-classes>true</exclude-unlisted-classes>
+    <properties/>
+  </persistence-unit>
+  <persistence-unit name="com.adssets_ApiSocut24-ejb_ejb_1PU2" transaction-type="JTA">
+    <jta-data-source>jdbc/common_auth2</jta-data-source>
+    <class>com.adssets.model.Publisher</class>
+    <class>com.adssets.model.User</class>
+    <exclude-unlisted-classes>true</exclude-unlisted-classes>
     <properties/>
   </persistence-unit>
 </persistence>

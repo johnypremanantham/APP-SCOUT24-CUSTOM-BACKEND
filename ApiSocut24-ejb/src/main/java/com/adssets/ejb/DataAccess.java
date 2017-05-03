@@ -157,10 +157,14 @@ public class DataAccess implements DataAccessLocal {
         }            
         
     }
+    
+    
+  
 
     @Override
     public String buildFeedForMarket(String marketId) {
              JsonArray jsonArray = new JsonArray();
+             JsonParser parser = new JsonParser(); 
 
 //        Feed feed = feedFacade.find(marketId);
         Market market = marketFacade.find(Integer.valueOf(marketId));
@@ -168,7 +172,7 @@ public class DataAccess implements DataAccessLocal {
         List<Feed> feeds = em.createNamedQuery("Feed.findByMarketId")
                 .setParameter("marketId", market)
                 .getResultList();
-        
+        if(feeds.size() > 0){
         for (Feed feed : feeds) {
             JsonObject obj = new JsonObject();
             obj.addProperty("id", feed.getId());
@@ -180,19 +184,43 @@ public class DataAccess implements DataAccessLocal {
         JsonObject obj = jsonArray.get(0).getAsJsonObject();
         String objArray = obj.get("json").getAsString();
         
-        
-        String[] objIds = objArray.replaceAll("^\\[|\\]$", "").split(",(?=(([^\"]*\"){2})*[^\"]*$)");
-        
+        //PARSE OBJARRAY TO JSON ARRAY INSTEAD OF REPLACEALL
+//        String[] objIds = objArray.replaceAll("^\\[|\\]$", "").split(",(?=(([^\"]*\"){2})*[^\"]*$)");
+        JsonArray objArrayParsed = parser.parse(objArray).getAsJsonArray();
         JsonArray objData = new JsonArray();
         
-        for (String objId : objIds) {
-            String result = scout24.getAppartments(objId);
-            JsonParser parser = new JsonParser();
+        for (JsonElement objId : objArrayParsed) {   
+            System.out.println(objId);
+            try{
+            Boolean isInt = isInteger(objId.getAsString());
+            String result = scout24.getAppartments(objId.getAsString());
             JsonObject resultObj = parser.parse(result).getAsJsonObject();
+            String link = "{\"link\": \"https://www.immobilienscout24.de/expose/"+objId+"?referrer=\"}";
+            JsonObject clickLink = parser.parse(link).getAsJsonObject();
+            resultObj.add("clickLink", clickLink);
             objData.add(resultObj);
+            }catch(UnsupportedOperationException ex){
+            objData.add(objId);
+            }
+            
         }
         return objData.toString();
+        }else{
+            return new JsonArray().toString();
+        }
         
     }
+    
+    public static boolean isInteger(String s) {
+    try { 
+        Integer.parseInt(s); 
+    } catch(NumberFormatException e) { 
+        return false; 
+    } catch(NullPointerException e) {
+        return false;
+    }
+    // only got here if we didn't return false
+    return true;
+}
   
 }
