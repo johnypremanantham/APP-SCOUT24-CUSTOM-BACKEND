@@ -198,6 +198,8 @@ public class DataAccess implements DataAccessLocal {
             String link = "{\"link\": \"https://www.immobilienscout24.de/expose/"+objId+"?referrer=\"}";
             JsonObject clickLink = parser.parse(link).getAsJsonObject();
             resultObj.add("clickLink", clickLink);
+            resultObj.add("objectId", objId);
+            resultObj.add("marketId", parser.parse(marketId));
             objData.add(resultObj);
             }catch(UnsupportedOperationException ex){
             objData.add(objId);

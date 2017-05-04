@@ -66,7 +66,7 @@ public class AuthenticationFilter implements Filter{
 			//this.context.log("Unauthorized access request");
                         
 			 System.out.println("Processing login logic");
-                        if (uri.endsWith("GetDataExtSBTechForAd") || uri.endsWith("GetDataExtSBTechPreviewServlet") || uri.endsWith("Logout"))
+                        if (uri.endsWith("FeedServlet") || uri.endsWith("Logout")) //|| uri.endsWith("Validation") || uri.endsWith("GetAppartment")
                         {
                             System.out.println("Authorized access request (special)");
                             

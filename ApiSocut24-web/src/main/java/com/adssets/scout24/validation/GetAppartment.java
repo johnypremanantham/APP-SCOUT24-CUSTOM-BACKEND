@@ -25,6 +25,7 @@ public class GetAppartment extends HttpServlet {
     @EJB
     private Scout24Local scout24;
 
+    String pin;
     
     
     /**
@@ -47,7 +48,10 @@ public class GetAppartment extends HttpServlet {
             
             
             if( strPin!=null ){
+                pin = strPin;
                 scout24.validatePin(strPin);
+            }else{
+                 scout24.validatePin(pin);
             }
 //            92848560
             

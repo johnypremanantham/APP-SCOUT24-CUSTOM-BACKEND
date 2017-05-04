@@ -1,6 +1,8 @@
+com\adssets\servlet\FrontendLoginServlet.class
+com\adssets\servlet\MarketServlet.class
+com\adssets\scout24\validation\GetAppartment.class
 com\adssets\scout24\validation\Validation.class
 com\adssets\servlet\filter\AuthenticationFilter.class
 com\adssets\servlet\FeedServlet.class
+com\adssets\servlet\LogoutServlet.class
 com\adssets\servlet\ObjectServlet.class
-com\adssets\servlet\MarketServlet.class
-com\adssets\scout24\validation\GetAppartment.class
