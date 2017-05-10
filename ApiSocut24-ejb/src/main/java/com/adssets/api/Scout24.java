@@ -5,6 +5,7 @@
  */
 package com.adssets.api;
 
+import com.google.gson.JsonParser;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -146,9 +147,10 @@ public class Scout24 implements Scout24Local {
                     try {
                         
                         JSONObject outObj = XML.toJSONObject(sb.toString());
+                        JsonParser parser = new JsonParser(); 
+
                         
-                        
-                        JSONObject objPrice = new JSONObject();
+                        Object objPrice = new Object();
                         JSONObject objTitlePicture = new JSONObject();
                         JSONObject objAdPicture = new JSONObject();
                         JSONObject objAddress = new JSONObject();
@@ -157,13 +159,13 @@ public class Scout24 implements Scout24Local {
                         
 //                        System.out.println(outObj.toString());
                                                
-                        objPrice = outObj.getJSONObject("expose:expose").getJSONObject("realEstate").getJSONObject("price");
+                        objPrice = outObj.getJSONObject("expose:expose").getJSONObject("realEstate").get("calculatedPrice");  //price
                         objTitlePicture = outObj.getJSONObject("expose:expose").getJSONObject("realEstate").getJSONObject("titlePicture").getJSONObject("urls")
                                 .getJSONArray("url").getJSONObject(1);
                         objAdPicture = outObj.getJSONObject("expose:expose").getJSONObject("realEstate").getJSONObject("titlePicture").getJSONObject("urls")
                                 .getJSONArray("url").getJSONObject(4);
                         objAddress = outObj.getJSONObject("expose:expose").getJSONObject("realEstate").getJSONObject("address");
-                        objLivingSpace = outObj.getJSONObject("expose:expose").getJSONObject("realEstate").get("livingSpace");
+                        objLivingSpace = outObj.getJSONObject("expose:expose").getJSONObject("realEstate").get("minDivisible"); //livingSpace
 
                         obj.put("price", objPrice);
                         obj.put("titlepicture", objTitlePicture);
@@ -172,7 +174,7 @@ public class Scout24 implements Scout24Local {
                         obj.put("livingspace", objLivingSpace);
                             
                         
-                        return obj.toString();
+                        return obj.toString();  //obj
                     }catch(JSONException je){
                         je.printStackTrace();
                         return "{\"error\":2}";
