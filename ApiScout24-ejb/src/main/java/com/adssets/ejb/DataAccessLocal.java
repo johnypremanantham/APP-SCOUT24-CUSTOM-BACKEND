@@ -24,7 +24,7 @@ public interface DataAccessLocal {
     
     String createFeed(String obj);
     
-    String buildFeedForMarket(String marketId);
+    String buildFeedForMarket(String marketId, String lazyLoad);
 
     
     

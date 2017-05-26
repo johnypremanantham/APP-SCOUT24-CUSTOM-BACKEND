@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.adssets.scout24.validation;
+package com.adssets.servlet;
 
 import com.adssets.api.Scout24Local;
 import java.io.IOException;
@@ -19,13 +19,13 @@ import javax.servlet.http.HttpServletResponse;
  *
  * @author dbr
  */
-@WebServlet(name = "GetAppartment", urlPatterns = {"/GetAppartment"})
-public class GetAppartment extends HttpServlet {
+@WebServlet(name = "GetApartment", urlPatterns = {"/GetApartment"})
+public class GetApartment extends HttpServlet {
 
     @EJB
     private Scout24Local scout24;
 
-    String pin;
+//    String pin;
     
     
     /**
@@ -44,27 +44,27 @@ public class GetAppartment extends HttpServlet {
 
         try (PrintWriter out = response.getWriter()) {
            
-            String strPin = request.getParameter("pin");
+//            String strPin = request.getParameter("pin");
             
             
-            if( strPin!=null ){
-                pin = strPin;
-                scout24.validatePin(strPin);
-            }else{
-                 scout24.validatePin(pin);
-            }
+//            if( strPin!=null ){
+//                pin = strPin;
+//                scout24.validatePin(strPin);
+//            }else{
+//                 scout24.validatePin(pin);
+//            }
 //            92848560
+
+//            scout24.validatePin(scout24.getPin());
             
             String objectId = request.getParameter("objectId");
          
             if(objectId == null){
                 objectId = "";
             }
-         
-          
-            String output = scout24.getAppartments(objectId);
+  
 
-            out.print(output);
+            out.print(scout24.getApartments(objectId));
         }
     }
 

@@ -162,7 +162,7 @@ public class DataAccess implements DataAccessLocal {
   
 
     @Override
-    public String buildFeedForMarket(String marketId) {
+    public String buildFeedForMarket(String marketId, String lazyLoad) {
              JsonArray jsonArray = new JsonArray();
              JsonParser parser = new JsonParser(); 
 
@@ -196,7 +196,7 @@ public class DataAccess implements DataAccessLocal {
                 System.out.println(value);
             //CHANGE ADPICTURE TO THE PICTURE STORED IN THE DATABASE
             if(value.equals("object")){
-            String result = scout24.getAppartments(objElmParsed.get("objectid").getAsString());
+            String result = scout24.getApartments(objElmParsed.get("objectid").getAsString());
             JsonObject resultObj = parser.parse(result).getAsJsonObject();
             String link = "{\"link\": \"https://www.immobilienscout24.de/expose/"+objElmParsed.get("objectid").getAsInt()+"?referrer=\"}";
             JsonObject clickLink = parser.parse(link).getAsJsonObject();
@@ -207,6 +207,12 @@ public class DataAccess implements DataAccessLocal {
             JsonObject objHref = new JsonObject();
             objHref.add("href", objElmParsed.get("url"));
             resultObj.add("adpicture", objHref);
+            //If lazyLoad = yes dont return "allpictures" LazyLoad=yes is the parameter the ad will send so it does not get unneccesary data
+            if(lazyLoad.equals("yes")){
+               resultObj.remove("allpictures");
+            }
+            
+            
             objData.add(resultObj);
             }else{
                 objData.add(objId);

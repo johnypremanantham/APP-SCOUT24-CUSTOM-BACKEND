@@ -18,6 +18,9 @@ public interface Scout24Local {
 
     String validatePin(String pin);
 
-    String getAppartments(String regionid);
+    String getApartments(String objectId);
     
+    String getLoans(String postalcode, String suburb);
+    
+    String getPin();
 }

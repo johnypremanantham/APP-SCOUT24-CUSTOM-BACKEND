@@ -39,6 +39,10 @@ public class Validation extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
+        
+        String pin = request.getParameter("pin");
+        
+        if(pin == null){
         try (PrintWriter out = response.getWriter()) {
             /* TODO output your page here. You may use following sample code. */
             out.println("<!DOCTYPE html>");
@@ -52,9 +56,23 @@ public class Validation extends HttpServlet {
             out.println("<a target='_blanc' href='" + urlValidation + "'> " + urlValidation + "</a><br><br>");
             out.println("<input id='in'/>");
             out.println("<button onclick='clickValidation()'>Send</button>");
-            out.println("<script src='js/validation.js'></script></body>");
+            out.println("<script src='validation_js/validation.js'></script></body>");
             out.println("</html>");
         }
+        }else{
+           String result = scout24.validatePin(pin);
+           if(Boolean.parseBoolean(result)){
+              try (PrintWriter out = response.getWriter()) {
+            out.println("Validation succeeded!");
+        }
+           }else{
+              try (PrintWriter out = response.getWriter()) {
+            out.println("Validation failed!");
+      
+        }
+           }
+        }
+        
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">

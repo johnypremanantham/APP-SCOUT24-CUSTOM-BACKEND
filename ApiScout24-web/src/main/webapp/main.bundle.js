@@ -89,10 +89,9 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 
 var StoreService = (function () {
     function StoreService() {
-        this.serverName = 'https://tte9.pliing.com/ApiSocut24-web'; // https://tte9.pliing.com/ApiSocut24-web http://rd001:32826/ApiSocut24-web/FeedServlet?marketId=1  http://rd001:32826/ApiSocut24-web
+        this.serverName = 'https://tte9.pliing.com/ApiScout24-web'; // https://tte9.pliing.com/ApiScout24-web https://tte9.pliing.com/ApiSocut24-web http://rd001:32826/ApiSocut24-web/FeedServlet?marketId=1  http://rd001:32826/ApiSocut24-web
         this.imageServerUrl = 'https://admin.pliing.com/AdAssetsService-web';
-        this.adServerUrl = "https://admin.pliing.com/BanGen";
-        this.serverPin = null;
+        this.adServerUrl = "https://admin.pliing.com/BanGen"; // ADMIN
         this.expandSidebar = true;
         this.showMarketOptions = false;
         this.createAdDiv = false;
@@ -125,7 +124,6 @@ var StoreService = (function () {
     StoreService.prototype.heightlightFeed = function () {
         var feedTab = document.getElementById('feedIndicator');
         var adTab = document.getElementById('adsIndicator');
-        console.log(adTab);
         setTimeout(function () {
             if (feedTab !== null) {
                 feedTab.classList.add('active-page');
@@ -195,8 +193,15 @@ var AppComponent = (function () {
         this.store.marketId = market.id;
         this.store.marketName = market.name;
         this.store.marketDescription = market.description;
-        this.store.selectedObjects;
+        this.store.selectedObjects = [];
         this.store.selectedDataContent = [];
+        // Highlight feedtab
+        var feedTab = document.getElementById('feedIndicator');
+        var adTab = document.getElementById('adsIndicator');
+        if (feedTab && adTab !== null) {
+            feedTab.classList.add('active-page');
+            adTab.classList.remove('active-page');
+        }
         this.store.markets.forEach(function (market) {
             var removeedit = document.getElementById('edit-' + market.id);
             if (removeedit !== null) {
@@ -211,8 +216,8 @@ var AppComponent = (function () {
             _this.store.selectedDataContent = response;
             _this.store.selectedDataContent.forEach(function (elm, index) {
                 if (elm["type"] === undefined) {
-                    var img = elm["adpicture"]["href"];
-                    elm["adpicture"]["href"] = img.replace("%WIDTH%", "278").replace("%HEIGHT%", "125");
+                    var img = elm["adpicture"]["href"]; /*["href"]*/
+                    elm["adpicture"]["href"] = img.replace("%WIDTH%", "278").replace("%HEIGHT%", "125"); /*["href"]*/
                     elm["pricem2"] = Math.round((elm["price"]["value"] / elm["livingspace"]));
                 }
             });
@@ -817,17 +822,16 @@ var AdsComponent = (function () {
             _this.bannerId = response[0]["bannerId"];
             var obj = {
                 "bannerId": _this.bannerId,
-                "service": "cacheTime<=>0<;>url<=>https:\/\/tte9.pliing.com\/ApiSocut24-web\/FeedServlet?marketId=" + _this.store.marketId
+                /*"service": "cacheTime<=>0<;>url<=>http:\/\/test.pliing.com\/ApiScout24-web\/FeedServlet?marketId=" + this.store.marketId + "&lazyLoad=yes"*/
+                "service": "cacheTime<=>0<;>url<=>https:\/\/tte9.pliing.com\/ApiScout24-web\/FeedServlet?marketId=" + _this.store.marketId + "&lazyLoad=yes" // lazyLoad=yes
             };
+            console.log(obj);
             _this.showPreviewPopup = true;
             // Updates ad to the service given in obj
             _this.json.postJSON(_this.store.adServerUrl + "/updateServiceServlet", obj)
                 .subscribe(function (response) {
                 var iframe = document.getElementById("adIframe");
                 iframe.style.visibility = "visible";
-                /*
-                              iframe.contentDocument.write(this.loadScript);
-                */
                 iframe.setAttribute("srcdoc", _this.loadScript);
             });
         });
@@ -894,7 +898,7 @@ var AdsComponent = (function () {
             "width": this.format.width,
             "height": this.format.height,
             "publisher": 89,
-            "service": "cacheTime<=>60<;>url<=>https:\/\/tte9.pliing.com\/ApiSocut24-web\/FeedServlet?marketId=" + this.store.marketId,
+            "service": "cacheTime<=>60<;>url<=>https:\/\/tte9.pliing.com\/ApiScout24-web\/FeedServlet?marketId=" + this.store.marketId + "&lazyLoad=yes",
             "tags": ["Scout24-custom", this.format.name, this.store.marketId]
         };
         if (this.adClickTracker !== undefined) {
@@ -911,16 +915,6 @@ var AdsComponent = (function () {
             _this.showmetadata = false;
             _this.store.createAdDiv = false;
             _this.getAds(true);
-            /* this.hidePreviewPopup();
-             this.storeservice.createdAdDiv = false;
-             this.storeservice.adListDiv = true;
-             var _localThis = this;  //MOVE THIS PART TO GETADS(); SEND A PARAMTER GETADS(TRUE) IF TRUE IT SHOULD HIGHTLIGHT OTHERWISE NOT
-             setTimeout(function () {
-             var tr: any = document.getElementById(_localThis.bannerId);
-             if(tr !== null) {
-             tr.style.backgroundColor = "rgba(0, 0, 0, 0.1)";
-             }
-             }, 1500);*/
         });
     };
     AdsComponent.prototype.showScript = function (script) {
@@ -1069,10 +1063,14 @@ var GetcontentComponent = (function () {
         this.showObjectidWarning = false;
         this.showObjectidNotexistWarning = false;
         this.showFilesizeError = false;
+        this.selectimagepopup = false;
+        this.tileWidth = "285";
+        this.tileHeight = "300";
     }
     // CLICK SIDEBAR
     GetcontentComponent.prototype.ngOnInit = function () {
         var _this = this;
+        console.log("getmarket init");
         this.store.showMarketOptions = true;
         this.store.heightlightFeed();
         var getObjects = true;
@@ -1100,6 +1098,30 @@ var GetcontentComponent = (function () {
             this.getSelectedObjects();
         }
     };
+    GetcontentComponent.prototype.getSelectedObjects = function () {
+        var _this = this;
+        this.json.getJSON(this.store.serverName + '/FeedServlet?marketId=' + this.store.marketId)
+            .subscribe(function (response) {
+            /*console.log(response);*/
+            _this.store.selectedDataContent = response;
+            _this.store.selectedDataContent.forEach(function (elm, index) {
+                if (elm["type"] === undefined) {
+                    var img = elm["adpicture"]["href"]; /*["href"]*/
+                    elm["adpicture"]["href"] = img.replace("%WIDTH%", "278").replace("%HEIGHT%", "125"); /* ["href"]*/
+                    elm["pricem2"] = Math.round((elm["price"]["value"] / elm["livingspace"]));
+                }
+            });
+            _this.store.showComponent = true;
+            _this.store.showLoadingIcon = false;
+        });
+        this.json.getJSON(this.store.serverName + '/Object?marketId=' + this.store.marketId)
+            .subscribe(function (response) {
+            if (response.length > 0) {
+                _this.store.selectedObjects = response[0]['json'];
+                _this.store.selectedObjects = JSON.parse(_this.store.selectedObjects);
+            }
+        });
+    };
     GetcontentComponent.prototype.cancelObject = function () {
         this.store.objectId = "";
         this.store.showData = false;
@@ -1119,88 +1141,6 @@ var GetcontentComponent = (function () {
             _localThis.clickImageDiv = true;
         }, 700);
     };
-    GetcontentComponent.prototype.getSelectedObjects = function () {
-        var _this = this;
-        this.json.getJSON(this.store.serverName + '/FeedServlet?marketId=' + this.store.marketId)
-            .subscribe(function (response) {
-            _this.store.selectedDataContent = response;
-            _this.store.selectedDataContent.forEach(function (elm, index) {
-                if (elm["type"] === undefined) {
-                    var img = elm["adpicture"]["href"];
-                    elm["adpicture"]["href"] = img.replace("%WIDTH%", "278").replace("%HEIGHT%", "125");
-                    elm["pricem2"] = Math.round((elm["price"]["value"] / elm["livingspace"]));
-                }
-            });
-            _this.store.showComponent = true;
-            _this.store.showLoadingIcon = false;
-        });
-        this.json.getJSON(this.store.serverName + '/Object?marketId=' + this.store.marketId)
-            .subscribe(function (response) {
-            if (response.length > 0) {
-                _this.store.selectedObjects = response[0]['json'];
-                _this.store.selectedObjects = JSON.parse(_this.store.selectedObjects);
-            }
-        });
-        /* this.json.getJSON(this.store.serverName + '/Object?marketId=' + this.store.marketId)
-         .subscribe(response => {
-         console.log(response);
-         if(response.length > 0) {
-         this.selectedObjects = response[0]['json'];
-         this.selectedObjects = JSON.parse(this.selectedObjects);
-    
-         console.log(this.selectedObjects);
-         const _localThis = this;
-         // Get data for each entry
-         this.selectedObjects.forEach(function (elm, index) {
-         if(parseInt(elm)) {
-         _localThis.json.getJSON(_localThis.store.serverName + '/GetAppartment?pin=' + _localThis.store.serverPin + '&objectId=' + elm)
-         .subscribe(response => {
-         response["index"] = index;
-         _localThis.selectedDataContent.push(response);
-         });
-         }else{
-         elm["index"] = index;
-         _localThis.selectedDataContent.push(elm);
-    
-         }
-    
-         });
-    
-         setTimeout(function () {
-         _localThis.selectedDataContent.sort(function (a,b) {
-         return a.index - b.index;
-         });
-         _localThis.showComponent = true;
-         _localThis.showLoadingIcon = false;
-         },2000);
-         }
-    
-         });*/
-    };
-    /*  updateSelectedList(){
-     this.selectedDataContent = [];
-     const _localThis = this;
-     // Get data for each entry
-     /!* this.selectedObjects.forEach(function (elm, index) {
-     if(parseInt(elm)) {
-     _localThis.json.getJSON(_localThis.store.serverName + '/GetAppartment?pin=' + _localThis.store.serverPin + '&objectId=' + elm)
-     .subscribe(response => {
-     response["index"] = index;
-     _localThis.selectedDataContent.push(response);
-     });
-     }else{
-     elm["index"] = index;
-     _localThis.selectedDataContent.push(elm);
-  
-     }
-     setTimeout(function () {
-     _localThis.selectedDataContent.sort(function (a,b) {
-     return a.index - b.index;
-     });
-     },1000);
-  
-     });*!/
-     }*/
     GetcontentComponent.prototype.removeObject = function (index) {
         this.store.selectedObjects.splice(index, 1);
         this.store.selectedDataContent.splice(index, 1);
@@ -1208,13 +1148,29 @@ var GetcontentComponent = (function () {
     GetcontentComponent.prototype.getData = function () {
         var _this = this;
         this.showFilesizeError = false;
+        var _localThis = this;
         var isInt = parseInt(this.store.objectId);
         if (this.store.objectId !== "" && this.store.objectId !== undefined && isInt) {
-            this.json.getJSON(this.store.serverName + '/GetAppartment?pin=' + this.store.serverPin + '&objectId=' + this.store.objectId)
+            this.json.getJSON(this.store.serverName + '/GetApartment?objectId=' + this.store.objectId)
                 .subscribe(function (response) {
+                // If entered object ID is valid
                 if (response["error"] === undefined) {
-                    response["adpicture"]["href"] = response["adpicture"]["href"].replace("%WIDTH%", "285").replace("%HEIGHT%", "300");
+                    /* response["adpicture"]["href"] = response["adpicture"]["href"].replace("%WIDTH%", "285").replace("%HEIGHT%", "300");*/
                     response["pricem2"] = Math.round((response["price"]["value"] / response["livingspace"]));
+                    // Go through all pictures and pick out the ones that can scale
+                    response["allpictures"].forEach(function (elm, index) {
+                        if (elm["urls"] !== undefined) {
+                            elm["urls"]["url"].forEach(function (elm1, index1) {
+                                // If a img that can scale is found pick that img as the one to use
+                                if (elm1["scale"] === "SCALE") {
+                                    elm = {};
+                                    elm["image"] = elm1["href"].replace("%WIDTH%", _localThis.tileWidth).replace("%HEIGHT%", _localThis.tileHeight);
+                                    response["allpictures"][index] = elm;
+                                }
+                            });
+                        }
+                    });
+                    _this.selectedImage = response["allpictures"][0].image;
                     _this.objectData = response;
                     _this.store.showData = true;
                 }
@@ -1232,11 +1188,20 @@ var GetcontentComponent = (function () {
         if (this.store.selectedObjects === undefined) {
             this.store.selectedObjects = [];
         }
-        this.store.selectedObjects.push(parseInt(this.store.objectId));
-        this.json.getJSON(this.store.serverName + '/GetAppartment?pin=' + this.store.serverPin + '&objectId=' + this.store.objectId)
+        var img = this.selectedImage;
+        var obj = {
+            "type": "object",
+            "url": img.replace(this.tileWidth, "%WIDTH%").replace(this.tileHeight, "%HEIGHT%"),
+            "objectid": this.store.objectId
+        };
+        /* this.store.selectedObjects.push(parseInt(this.store.objectId));*/
+        // Push obj, img should not have width height replaced when pushed
+        this.store.selectedObjects.push(obj);
+        this.json.getJSON(this.store.serverName + '/GetApartment?objectId=' + this.store.objectId)
             .subscribe(function (response) {
-            var img = response["adpicture"]["href"];
-            response["adpicture"]["href"] = img.replace("%WIDTH%", "278").replace("%HEIGHT%", "125");
+            /*console.log(response);*/
+            /* const img = response["adpicture"]["href"];*/
+            response["adpicture"]["href"] = _this.selectedImage.replace("%WIDTH%", "278").replace("%HEIGHT%", "125"); /*["href"]*/
             response["pricem2"] = Math.round((response["price"]["value"] / response["livingspace"]));
             _this.store.selectedDataContent.push(response);
         });
@@ -1274,7 +1239,7 @@ var GetcontentComponent = (function () {
     };
     GetcontentComponent.prototype.saveObjects = function () {
         var _this = this;
-        console.log(this.store.selectedObjects);
+        /* console.log(this.store.selectedObjects);*/
         var obj = {
             'marketId': this.store.marketId,
             'json': this.store.selectedObjects
@@ -1285,6 +1250,13 @@ var GetcontentComponent = (function () {
             toastr.success("Order successfully saved!");
             _this.getSelectedObjects();
         });
+    };
+    GetcontentComponent.prototype.selectImage = function (url) {
+        this.selectedImage = url;
+        this.selectimagepopup = false;
+    };
+    GetcontentComponent.prototype.selectImagePopup = function () {
+        this.selectimagepopup = true;
     };
     GetcontentComponent.prototype.addLogo = function () {
         this.showLogoDiv = true;
@@ -1438,7 +1410,7 @@ module.exports = ""
 /***/ 690:
 /***/ (function(module, exports) {
 
-module.exports = "\n<div class=\"top-nav\" id=\"top-nav\">\n  <header>\n\n    <div class=\"page-header navbar navbar-fixed-top\">\n      <div class=\"page-header-inner\">\n\n\n\n        <!--BEGIN MOBILE HAMBURGER BUTTON-->\n        <button onclick=\"hamburgerToggle()\" id=\"hamburger-menu-btn\" class=\"c-hamburger c-hamburger--htla\">\n          <span>toggle menu</span>\n        </button>\n        <!--END MOBILE HAMBURGER BUTTON-->\n\n\n        <!-- BEGIN LOGO -->\n        <div class=\"page-logo\">\n          <a href=\"/ApiSocut24-web\">  <!--/dashboard-->\n            <span alt=\"logo\" class=\"logo-top\"></span> </a>\n\n        </div>\n        <!-- END LOGO -->\n\n\n        <div class=\"top-menu top-menu-pull-right\">\n          <ul class=\"nav navbar-nav pull-right\">\n\n\n            <li class=\"top-nav-item active-page page-tabs\" id=\"feedIndicator\" *ngIf=\"store.showMarketOptions\">\n              <a (click)=\"getMarketOption('feed')\"  data-close-others=\"true\">\n                <span> Feed </span>\n              </a>\n            </li>\n\n            <li class=\"top-nav-item page-tabs\" id=\"adsIndicator\" *ngIf=\"store.showMarketOptions\">\n              <a (click)=\"getMarketOption('ads')\"  data-close-others=\"true\">\n                <span> Ads </span>\n              </a>\n            </li>\n\n\n            <li class=\"dropdown dropdown-user\">\n              <a href=\"#\" class=\"dropdown-toggle\" data-toggle=\"dropdown\" data-hover=\"dropdown\" data-close-others=\"true\">\n                <img alt=\"\" class=\"img-circle\" src=\"./img/usericon.png\"/>\n                <span class=\"username username-hide-on-mobile\"> {{store.userName}} </span>\n                <i class=\"fa fa-angle-down\"></i>\n              </a>\n              <ul class=\"dropdown-menu dropdown-menu-default\">\n                <li>\n                  <!--<a (click)=\"logout()\">-->\n                  <a href=\"/ApiSocut24-web/Logout\">\n                    <i class=\"icon-logout\"></i> Logout </a>\n                </li>\n                <!--  <li (click)=\"changeLanguage('en');\">\n                    <i>English</i>\n                  </li>\n                  <li (click)=\"changeLanguage('sv')\">\n                    <i>Swedish</i>\n                  </li>-->\n              </ul>\n            </li>\n          </ul>\n        </div>\n      </div>\n    </div>\n  </header>\n\n  <div id=\"shadow-layer\"></div> <!--mobile menu hamburger backdrop-->\n\n</div>\n<!-- END TOP NAV -->\n\n\n<div id=\"card-popup-shadow\" style=\"visibility: hidden\"></div>\n\n\n<!--BEGIN CONTAINER-->\n<div class=\"page-container\">\n\n  <!-- BEGIN SIDEBAR -->\n\n  <div id=\"main-nav\">\n\n\n    <!--   <nav id=\"main-nav\">-->\n    <ul class=\"accordion-menu animated\" id=\"accordion-menu-main\">\n      <li class=\"has-children\">\n        <input type=\"checkbox\" name=\"group-2\" id=\"group-2\">\n        <label (click)=\"gotoHome();\" for=\"group-2\">  Dashboard\n        </label>\n      </li>\n\n\n      <li class=\"has-children\">\n        <input type=\"checkbox\" name=\"group-1\" id=\"group-1\">\n        <label (click)=\"getMarkets()\" id=\"sidebar-markets\" for=\"group-1\">\n          <span class=\"label-haschildren\">Market</span>\n          <span class=\"fa fa-chevron-down arrow-menu-icon\"></span>\n        </label>\n\n        <ul id=\"sidebar-dropdown\">\n\n          <li>\n            <button class=\"btn-def btn-create-market\" (click)=\"createMarket();\">Create market</button>\n          </li>\n          <li *ngFor=\"let market of store.markets; let i = index\" id={{market.id}}>\n            <a (click)=\"getMarketContent(market)\"><span>{{market.name}}</span></a>\n            <div class=\"market-settings hidden-obj\" id=edit-{{market.id}}>\n              <button class=\"settings-cog\" (click)=\"editMarket()\"><span>Edit</span></button>\n            </div>\n\n          </li>\n\n        </ul>\n      </li>\n\n    </ul>\n\n  </div>\n\n\n  <!-- END SIDEBAR -->\n\n\n\n  <div class=\"page-content-wrapper\">\n\n    <!-- BEGIN CONTENT BODY -->\n    <div class=\"page-main-content am-mobile-content-position\">\n      <div *ngIf=\"platformWarning\">\n        <img src=\"./img/hand-logo.png\" style=\"width: 100px;height: 100px; display: block;margin: auto\"/>\n\n        <h4 style=\"line-height: 25px; text-align: center\" >This application is not yet supported for mobile devices. </h4>\n        <h4 style=\"line-height: 25px; text-align: center\" >Please use the application on desktop. </h4>\n\n      </div>\n      <router-outlet></router-outlet>\n    </div>\n    <!-- END CONTENT BODY -->\n  </div>\n\n</div>\n<!--END PAGE CONTAINER-->\n\n"
+module.exports = "\n<div class=\"top-nav\" id=\"top-nav\">\n  <header>\n\n    <div class=\"page-header navbar navbar-fixed-top\">\n      <div class=\"page-header-inner\">\n\n\n\n        <!--BEGIN MOBILE HAMBURGER BUTTON-->\n        <button onclick=\"hamburgerToggle()\" id=\"hamburger-menu-btn\" class=\"c-hamburger c-hamburger--htla\">\n          <span>toggle menu</span>\n        </button>\n        <!--END MOBILE HAMBURGER BUTTON-->\n\n\n        <!-- BEGIN LOGO -->\n        <div class=\"page-logo\">\n          <a href=\"/ApiScout24-web\">  <!--/dashboard-->\n            <span alt=\"logo\" class=\"logo-top\"></span> </a>\n\n        </div>\n        <!-- END LOGO -->\n\n\n        <div class=\"top-menu top-menu-pull-right\">\n          <ul class=\"nav navbar-nav pull-right\">\n\n\n            <li class=\"top-nav-item active-page page-tabs\" id=\"feedIndicator\" *ngIf=\"store.showMarketOptions\">\n              <a (click)=\"getMarketOption('feed')\"  data-close-others=\"true\">\n                <span> Feed </span>\n              </a>\n            </li>\n\n            <li class=\"top-nav-item page-tabs\" id=\"adsIndicator\" *ngIf=\"store.showMarketOptions\">\n              <a (click)=\"getMarketOption('ads')\"  data-close-others=\"true\">\n                <span> Ads </span>\n              </a>\n            </li>\n\n\n            <li class=\"dropdown dropdown-user\">\n              <a href=\"#\" class=\"dropdown-toggle\" data-toggle=\"dropdown\" data-hover=\"dropdown\" data-close-others=\"true\">\n                <img alt=\"\" class=\"img-circle\" src=\"./img/usericon.png\"/>\n                <span class=\"username username-hide-on-mobile\"> {{store.userName}} </span>\n                <i class=\"fa fa-angle-down\"></i>\n              </a>\n              <ul class=\"dropdown-menu dropdown-menu-default\">\n                <li>\n                  <!--<a (click)=\"logout()\">-->\n                  <a href=\"/ApiScout24-web/Logout\">\n                    <i class=\"icon-logout\"></i> Logout </a>\n                </li>\n                <!--  <li (click)=\"changeLanguage('en');\">\n                    <i>English</i>\n                  </li>\n                  <li (click)=\"changeLanguage('sv')\">\n                    <i>Swedish</i>\n                  </li>-->\n              </ul>\n            </li>\n          </ul>\n        </div>\n      </div>\n    </div>\n  </header>\n\n  <div id=\"shadow-layer\"></div> <!--mobile menu hamburger backdrop-->\n\n</div>\n<!-- END TOP NAV -->\n\n\n<div id=\"card-popup-shadow\" style=\"visibility: hidden\"></div>\n\n\n<!--BEGIN CONTAINER-->\n<div class=\"page-container\">\n\n  <!-- BEGIN SIDEBAR -->\n\n  <div id=\"main-nav\">\n\n\n    <!--   <nav id=\"main-nav\">-->\n    <ul class=\"accordion-menu animated\" id=\"accordion-menu-main\">\n      <li class=\"has-children\">\n        <input type=\"checkbox\" name=\"group-2\" id=\"group-2\">\n        <label (click)=\"gotoHome();\" for=\"group-2\">  Dashboard\n        </label>\n      </li>\n\n\n      <li class=\"has-children\">\n        <input type=\"checkbox\" name=\"group-1\" id=\"group-1\">\n        <label (click)=\"getMarkets()\" id=\"sidebar-markets\" for=\"group-1\">\n          <span class=\"label-haschildren\">Market</span>\n          <span class=\"fa fa-chevron-down arrow-menu-icon\"></span>\n        </label>\n\n        <ul id=\"sidebar-dropdown\">\n\n          <li>\n            <button class=\"btn-def btn-create-market\" (click)=\"createMarket();\">Create market</button>\n          </li>\n          <li *ngFor=\"let market of store.markets; let i = index\" id={{market.id}}>\n            <a (click)=\"getMarketContent(market)\"><span>{{market.name}}</span></a>\n            <div class=\"market-settings hidden-obj\" id=edit-{{market.id}}>\n              <button class=\"settings-cog\" (click)=\"editMarket()\"><span>Edit</span></button>\n            </div>\n\n          </li>\n\n        </ul>\n      </li>\n\n    </ul>\n\n  </div>\n\n\n  <!-- END SIDEBAR -->\n\n\n\n  <div class=\"page-content-wrapper\">\n\n    <!-- BEGIN CONTENT BODY -->\n    <div class=\"page-main-content am-mobile-content-position\">\n      <div *ngIf=\"platformWarning\">\n        <img src=\"./img/hand-logo.png\" style=\"width: 100px;height: 100px; display: block;margin: auto\"/>\n\n        <h4 style=\"line-height: 25px; text-align: center\" >This application is not yet supported for mobile devices. </h4>\n        <h4 style=\"line-height: 25px; text-align: center\" >Please use the application on desktop. </h4>\n\n      </div>\n      <router-outlet></router-outlet>\n    </div>\n    <!-- END CONTENT BODY -->\n  </div>\n\n</div>\n<!--END PAGE CONTAINER-->\n\n"
 
 /***/ }),
 
@@ -1466,7 +1438,7 @@ module.exports = "<div *ngIf=\"store.showComponent\">\n\n\n  <!-- BEGIN PAGE HEA
 /***/ 694:
 /***/ (function(module, exports) {
 
-module.exports = "<div *ngIf=\"store.showComponent\" style=\"height: 100%;\">\n\n  <!-- BEGIN PAGE HEAD-->\n  <div class=\"page-head\">\n    <!-- BEGIN PAGE TITLE -->\n    <!--    <div class=\"page-title\">\n          <h1>Market: {{store.marketName}}\n            <small>Description: {{store.marketDescription}}</small>\n            &lt;!&ndash;      <small>Adjust the feed to customize and prioritize the games to be shown in the ad</small>&ndash;&gt;\n          </h1>\n        </div>-->\n    <!-- END PAGE TITLE -->\n\n    <!--    <div class=\"page-btn-container\">  &lt;!&ndash;*ngIf=\"!storeservice.createdAdDiv\"&ndash;&gt;\n          <button type=\"submit\" (click)=\"saveObjects()\" class=\"btn-reg\">Save</button>\n        </div>-->\n\n  </div>\n  <!-- END PAGE HEAD-->\n\n  <!--BEGIN COL-MD-12-->\n  <div class=\"col-md-12\" style=\"height: calc(100% - 19px)\">\n\n\n    <div style=\"width: calc(100% - 420px); min-width: 650px; float: left;\">\n      <div class=\"sc-search-area\">\n        <!-- BEGIN SEARCH FIELD -->\n        <div id=\"sc-search-field\">\n          <input type=\"text\" [(ngModel)]=\"store.objectId\" (keyup)=\"validateObjectID();\" placeholder=\"Object ID\" (keyup.enter)=\"getData();\" />\n          <i class=\"fa fa-search\" aria-hidden=\"true\"></i>\n          <button (click)=\"getData();\">Find</button>\n          <span *ngIf=\"showObjectidWarning\" style=\"color: red;\">Enter an object ID</span>\n          <span *ngIf=\"showObjectidNotexistWarning\" style=\"color: red;\">Object ID does not exist</span>\n        </div>\n        <!-- END SEARCH FIELD -->\n\n\n\n\n        <!-- START ADD LOGO-->\n        <div>\n          <!--    <button (click)=\"addLogo();\">Add logo</button>\n              <div *ngIf=\"showLogoDiv\">-->\n\n\n          <div id=\"imgDivContainer\" class=\"sc-object-select-area\"> <!--Add class \"sc-drop-media\" when mouse drag over-->\n\n\n            <div class=\"sc-object-placeholder\">\n              <div class=\"sc-object-placeholder-inner\">\n                <img src=\"https://mds.pliing.com/sync/libs/scout24/media-upload-icon.png\">\n                <p>Search or Create an object<br><span>Drag an image or click here to create a custom object.</span></p>\n              </div>\n            </div>\n\n            <span *ngIf=\"showFilesizeError\" style=\"color: red; position: fixed\">The file you tried to upload exceeds the limit which is 1000kb</span>\n\n\n\n\n\n            <!-- BEGIN CUSTOM IMAGE UPLOAD AREA -->\n            <div style=\"opacity: 0; cursor: pointer;\" id=\"imgUploadDiv\" class=\"sc-custom-image-area\" (click)=\"triggerFileUpload();\" (dragover)=\"allowDrop($event);\"\n                 (drop)=\"dropImage($event);\">\n\n              <div><img id=\"imgImage\" class=\"sc-search-result-thumbnail\" src=\"\"></div>\n\n\n              <div class=\"sc-search-result-metadata\">\n                <div class=\"form-group form-md-line-input\">\n                  <input class=\"form-control\" type=\"text\" placeholder=\"http://www.example.com\" [(ngModel)]=\"logoURL\">\n                  <label>Enter a URL</label>\n                  <span class=\"help-block\">Your custom image will be linked to this URL.</span>\n                </div>\n              </div>\n\n              <div class=\"sc-search-result-options\">\n                <button class=\"cancel\" (click)=\"cancelLogo();\">Cancel</button>\n                <button class=\"select\" (click)=\"selectLogo();\">Select</button>\n              </div>\n\n            </div>\n\n            <input id=\"imgInput\" style=\"display: none\" (change)=\"readImage();\" type=\"file\"  name=\"picture\" />\n            <!-- END CUSTOM IMAGE UPLOAD AREA -->\n\n\n\n\n\n            <!-- BEGIN SEARCH RESULT AREA -->\n            <div class=\"sc-search-result-area\" *ngIf=\"store.showData\">\n              <div class=\"sc-search-result\">\n                <div><img class=\"sc-search-result-thumbnail\" src=\"{{objectData.adpicture.href}}\"></div>\n                <div class=\"sc-search-result-metadata\">\n\n                  <h1>{{objectData.address.geoHierarchy.quarter.name}},\n                    {{objectData.address.geoHierarchy.city.name}}\n                  </h1>\n                  <h1 style=\"margin-bottom: 10px;\">\n                    {{objectData.address.geoHierarchy.region.name}}, {{objectData.address.postcode}}\n                  </h1>\n\n                  <div class=\"col-md-4\">\n                    <!-- <h2>{{objectData.price.value}} {{objectData.price.currency}}</h2>-->\n                    <h2>{{objectData.pricem2}} &euro; m<sup>2</sup></h2>\n                    <!--<span>Kaufpreis</span>-->\n                  </div>\n                  <div class=\"col-md-4\">\n                    <h2>{{objectData.livingspace}} m<sup>2</sup></h2>\n                    <span>Wohnfläche</span>\n                  </div>\n                  <!-- <div class=\"col-md-4\">\n                     <h2>{{objectData.livingspace}} m<sup>2</sup></h2>\n                     <span>Wohnfläche</span>\n                   </div>-->\n                  <!--             <label for=\"cityname\">City name:</label>\n                               <span id=\"cityname\">{{objectData.address.geoHierarchy.city.name}}</span>\n                               <label for=\"quartername\">Quarter name:</label>\n                               <span id=\"quartername\">{{objectData.address.geoHierarchy.quarter.name}}</span>\n                               <label for=\"regionname\">Region name:</label>\n                               <span id=\"regionname\">{{objectData.address.geoHierarchy.region.name}}</span>\n                               <label for=\"postcode\">Post code:</label>\n                               <span id=\"postcode\">{{objectData.address.postcode}}</span>\n                               <label for=\"price\">Price:</label>\n                               <span id=\"price\">{{objectData.price.value}}</span>\n                               <label for=\"currency\">Currency</label>\n                               <span id=\"currency\">{{objectData.price.currency}}</span>\n                               <label for=\"livingspace\">Livingspace</label>\n                               <span id=\"livingspace\">{{objectData.livingspace}}</span>-->\n                  <div class=\"sc-search-result-options\">\n                    <button class=\"cancel\" (click)=\"cancelObject();\">Cancel</button>\n                    <button class=\"select\" (click)=\"selectObject();\">Select</button>\n                  </div>\n                </div>\n\n              </div>\n            </div>\n            <!-- END SEARCH RESULT AREA -->\n\n\n\n\n          </div>\n\n\n\n          <!--    </div>-->\n        </div>\n        <!-- END ADD LOGO-->\n\n      </div>\n\n    </div>\n\n    <!--TEST-->\n    <!--  <div class=\"col-md-4 sc-selected-objects-container\"></div>-->\n\n\n    <!--BEGIN SELECTED OBJECTS SIDEBAR-->\n    <div class=\"sc-selected-objects-sidebar col-md-4\">\n      <!--BEGIN PREVIEW SIDEBAR HEAD-->\n      <div class=\"box-form-headline-panel\">\n        <div class=\"box-form-headline-wrapper\">\n          <span class=\"caption-subject box-headline\">Selected objects</span>\n        </div>\n        <!--\n            <div class=\"tools\">\n              <a onclick=\"spinIcon(this)\" (click)=\"generatePreview();\" class=\"reload\" data-original-title=\"\" title=\"\"> </a>\n              <a onclick=\"closePreviewSidebar()\" class=\"collapse-icon-black\"></a>\n              <a onclick=\"collapsePreviewSidebar()\" class=\"fullscreen-collapse-icon color-black\"></a>\n            </div>\n        -->\n        <div class=\"options-wrapper\">\n          <div class=\"options-inner\">\n            <div class=\"options\">\n              <button class=\"btn-inverted black\" type=\"submit\" (click)=\"saveObjects()\">Save Order</button>\n            </div>\n          </div>\n        </div>\n\n      </div>\n      <!--END SELECTED OBJECTS HEAD-->\n\n      <hr class=\"hr-headline-panel\">\n\n\n      <!-- BEGIN SELECTED OBJECTS -->\n\n\n      <!--Remove the class \"sc-list-selected-objects\" below to enable card view (column view)-->\n      <div class=\"sc-selected-objects-inner sc-list-selected-objects\">\n        <div [dragula]='\"bag-one\"' [dragulaModel]='store.selectedObjects' *ngIf=\"store.selectedDataContent.length > 0\">\n          <div class=\"sc-selected-object\" *ngFor=\"let object of store.selectedDataContent; let i = index\">\n\n            <div id=\"sc-selected-property\" *ngIf=\"object.type === undefined\">\n              <div class=\"sc-selected-object-thumbnail-wrapper\">\n                <img class=\"sc-selected-object-thumbnail\" src=\"{{object.adpicture.href}}\">\n              </div>\n\n              <div class=\"sc-selected-object-metadata\">\n                <label>\n                  {{object.address.geoHierarchy.city.name}}\n                  {{object.address.geoHierarchy.quarter.name}}\n                  {{object.address.geoHierarchy.region.name}}\n                </label>\n                <label class=\"sc-sub\">\n                  <span id=\"price\">{{object.pricem2}} &euro; m<sup>2</sup></span>\n                  <!-- <span id=\"currency\">{{object.price.currency}}</span>-->\n                </label>\n                <div class=\"btn-card-thumbnail-delete\">\n                  <i class=\"fa fa-times\" (click)=\"removeObject(i)\"></i>\n                </div>\n              </div>\n            </div>\n\n            <div id=\"sc-selected-custom\">\n              <div class=\"sc-selected-object-thumbnail-wrapper\" *ngIf=\"object.type === 'logo'\">\n                <img class=\"sc-selected-object-thumbnail\" src=\"{{object.picture}}\">\n                <div class=\"sc-selected-object-metadata link\">\n                  <!--Set char limit 150, hovering will show title, aka full URL path-->\n                  <label class=\"sc-selected-object-metadata-link\" title=\"{{object.url}}\"\n                         id=\"url\">Link: {{object.url}}</label>\n                  <div class=\"btn-card-thumbnail-delete\">\n                    <i class=\"fa fa-times\" (click)=\"removeObject(i)\"></i>\n                  </div>\n                </div>\n              </div>\n            </div>\n\n          </div>\n        </div>\n      </div>\n      <!-- END SELECTED OBJECTS -->\n\n\n    </div>\n    <!--END PREVIEW SIDEBAR-->\n\n\n  </div>\n  <!--END COL-MD-12-->\n\n\n</div>\n<div *ngIf=\"store.showLoadingIcon\">\n  <img style=\"position: fixed; top: 50%; left: 60%; transform: translate(-50%, -50%);\"\n       src=\"./img/ripple-load.gif\"/>\n</div>\n"
+module.exports = "<div *ngIf=\"store.showComponent\" style=\"height: 100%;\">\n\n\n  <!--BEGIN SCOUT 24 GALLERY POPUP-->\n\n  <div *ngIf=\"selectimagepopup\" style=\"position: fixed; border-radius: 4px; width: 750px; height: auto; padding: 30px; background-color: #fff; z-index: 999;\">\n    <div class=\"col-md-3\" style=\"position: relative;\" *ngFor=\"let img of objectData.allpictures\">\n      <img *ngIf=\"img.image !== undefined\" style=\"border: 1px solid #bbbbbb; width: 150px; height: 150px;\" (click)=\"selectImage(img.image);\" class=\"sc-search-result-thumbnail\" src=\"{{img.image}}\">\n    </div>\n  </div>\n\n  <!--END SCOUT 24 GALLERY POPUP-->\n\n\n\n\n\n  <!-- BEGIN PAGE HEAD-->\n  <div class=\"page-head\">\n    <!-- BEGIN PAGE TITLE -->\n    <!--    <div class=\"page-title\">\n          <h1>Market: {{store.marketName}}\n            <small>Description: {{store.marketDescription}}</small>\n            &lt;!&ndash;      <small>Adjust the feed to customize and prioritize the games to be shown in the ad</small>&ndash;&gt;\n          </h1>\n        </div>-->\n    <!-- END PAGE TITLE -->\n\n    <!--    <div class=\"page-btn-container\">  &lt;!&ndash;*ngIf=\"!storeservice.createdAdDiv\"&ndash;&gt;\n          <button type=\"submit\" (click)=\"saveObjects()\" class=\"btn-reg\">Save</button>\n        </div>-->\n\n  </div>\n  <!-- END PAGE HEAD-->\n\n  <!--BEGIN COL-MD-12-->\n  <div class=\"col-md-12\" style=\"height: calc(100% - 19px)\">\n\n\n    <div style=\"width: calc(100% - 420px); min-width: 650px; float: left;\">\n      <div class=\"sc-search-area\">\n        <!-- BEGIN SEARCH FIELD -->\n        <div id=\"sc-search-field\">\n          <input type=\"text\" [(ngModel)]=\"store.objectId\" (keyup)=\"validateObjectID();\" placeholder=\"Object ID\" (keyup.enter)=\"getData();\" />\n          <i class=\"fa fa-search\" aria-hidden=\"true\"></i>\n          <button (click)=\"getData();\">Find</button>\n          <span *ngIf=\"showObjectidWarning\" style=\"color: red;\">Enter an object ID</span>\n          <span *ngIf=\"showObjectidNotexistWarning\" style=\"color: red;\">Object ID does not exist</span>\n        </div>\n        <!-- END SEARCH FIELD -->\n\n\n\n\n        <!-- START ADD LOGO-->\n        <div>\n          <!--    <button (click)=\"addLogo();\">Add logo</button>\n              <div *ngIf=\"showLogoDiv\">-->\n\n\n          <div id=\"imgDivContainer\" class=\"sc-object-select-area\">\n\n\n            <div class=\"sc-object-placeholder\">\n              <div class=\"sc-object-placeholder-inner\">\n                <img src=\"https://mds.pliing.com/sync/libs/scout24/media-upload-icon.png\">\n                <p>Search or Create an object<br><span>Drag an image or click here to create a custom object.</span></p>\n              </div>\n            </div>\n\n            <span *ngIf=\"showFilesizeError\" style=\"color: red; position: fixed\">The file you tried to upload exceeds the limit which is 1000kb</span>\n\n\n\n\n\n            <!-- BEGIN CUSTOM IMAGE UPLOAD AREA -->\n            <div style=\"opacity: 0; cursor: pointer;\" id=\"imgUploadDiv\" class=\"sc-custom-image-area\" (click)=\"triggerFileUpload();\" (dragover)=\"allowDrop($event);\"\n                 (drop)=\"dropImage($event);\">\n\n              <div><img id=\"imgImage\" class=\"sc-search-result-thumbnail\" src=\"\"></div>\n\n\n              <div class=\"sc-search-result-metadata\">\n                <div class=\"form-group form-md-line-input\">\n                  <input class=\"form-control\" type=\"text\" placeholder=\"http://www.example.com\" [(ngModel)]=\"logoURL\">\n                  <label>Enter a URL</label>\n                  <span class=\"help-block\">Your custom image will be linked to this URL.</span>\n                </div>\n              </div>\n\n              <div class=\"sc-search-result-options\">\n                <button class=\"cancel\" (click)=\"cancelLogo();\">Cancel</button>\n                <button class=\"select\" (click)=\"selectLogo();\">Select</button>\n              </div>\n\n            </div>\n\n            <input id=\"imgInput\" style=\"display: none\" (change)=\"readImage();\" type=\"file\"  name=\"picture\" />\n            <!-- END CUSTOM IMAGE UPLOAD AREA -->\n\n\n\n\n\n            <!-- BEGIN SEARCH RESULT AREA -->\n            <div class=\"sc-search-result-area\" *ngIf=\"store.showData\">\n              <div class=\"sc-search-result\">\n                <!--<div><img class=\"sc-search-result-thumbnail\" src=\"{{objectData.adpicture.href}}\"></div>-->\n                <div>\n                  <img (click)=\"selectImagePopup();\" class=\"sc-search-result-thumbnail\" src={{selectedImage}}>\n                </div>\n                <div class=\"sc-search-result-metadata\">\n\n                  <h1>{{objectData.address.geoHierarchy.quarter.name}},\n                    {{objectData.address.geoHierarchy.city.name}}\n                  </h1>\n                  <h1 style=\"margin-bottom: 10px;\">\n                    {{objectData.address.geoHierarchy.region.name}}, {{objectData.address.postcode}}\n                  </h1>\n\n                  <div class=\"col-md-4\">\n                    <!-- <h2>{{objectData.price.value}} {{objectData.price.currency}}</h2>-->\n                    <h2>{{objectData.pricem2}} &euro; m<sup>2</sup></h2>\n                    <!--<span>Kaufpreis</span>-->\n                  </div>\n                  <div class=\"col-md-4\">\n                    <h2>{{objectData.livingspace}} m<sup>2</sup></h2>\n                    <span>Wohnfläche</span>\n                  </div>\n\n                  <!-- <div class=\"col-md-4\">\n                     <h2>{{objectData.livingspace}} m<sup>2</sup></h2>\n                     <span>Wohnfläche</span>\n                   </div>-->\n                  <!--             <label for=\"cityname\">City name:</label>\n                               <span id=\"cityname\">{{objectData.address.geoHierarchy.city.name}}</span>\n                               <label for=\"quartername\">Quarter name:</label>\n                               <span id=\"quartername\">{{objectData.address.geoHierarchy.quarter.name}}</span>\n                               <label for=\"regionname\">Region name:</label>\n                               <span id=\"regionname\">{{objectData.address.geoHierarchy.region.name}}</span>\n                               <label for=\"postcode\">Post code:</label>\n                               <span id=\"postcode\">{{objectData.address.postcode}}</span>\n                               <label for=\"price\">Price:</label>\n                               <span id=\"price\">{{objectData.price.value}}</span>\n                               <label for=\"currency\">Currency</label>\n                               <span id=\"currency\">{{objectData.price.currency}}</span>\n                               <label for=\"livingspace\">Livingspace</label>\n                               <span id=\"livingspace\">{{objectData.livingspace}}</span>-->\n                  <div class=\"sc-search-result-options\">\n                    <button class=\"cancel\" (click)=\"cancelObject();\">Cancel</button>\n                    <button class=\"select\" (click)=\"selectObject();\">Select</button>\n                  </div>\n                </div>\n\n              </div>\n            </div>\n            <!-- END SEARCH RESULT AREA -->\n\n          </div>\n        </div>\n        <!-- END ADD LOGO-->\n      </div>\n\n    </div>\n\n\n    <!--TEST-->\n    <!--  <div class=\"col-md-4 sc-selected-objects-container\"></div>-->\n\n\n    <!--BEGIN SELECTED OBJECTS SIDEBAR-->\n    <div class=\"sc-selected-objects-sidebar col-md-4\">\n      <!--BEGIN PREVIEW SIDEBAR HEAD-->\n      <div class=\"box-form-headline-panel\">\n        <div class=\"box-form-headline-wrapper\">\n          <span class=\"caption-subject box-headline\">Selected objects</span>\n        </div>\n        <!--\n            <div class=\"tools\">\n              <a onclick=\"spinIcon(this)\" (click)=\"generatePreview();\" class=\"reload\" data-original-title=\"\" title=\"\"> </a>\n              <a onclick=\"closePreviewSidebar()\" class=\"collapse-icon-black\"></a>\n              <a onclick=\"collapsePreviewSidebar()\" class=\"fullscreen-collapse-icon color-black\"></a>\n            </div>\n        -->\n        <div class=\"options-wrapper\">\n          <div class=\"options-inner\">\n            <div class=\"options\">\n              <button class=\"btn-inverted black\" type=\"submit\" (click)=\"saveObjects()\">Save Order</button>\n            </div>\n          </div>\n        </div>\n\n      </div>\n      <!--END SELECTED OBJECTS HEAD-->\n\n      <hr class=\"hr-headline-panel\">\n\n\n      <!-- BEGIN SELECTED OBJECTS -->\n\n\n      <!--Remove the class \"sc-list-selected-objects\" below to enable card view (column view)-->\n      <div class=\"sc-selected-objects-inner sc-list-selected-objects\">\n        <div [dragula]='\"bag-one\"' [dragulaModel]='store.selectedObjects' *ngIf=\"store.selectedDataContent.length > 0\">\n          <div class=\"sc-selected-object\" *ngFor=\"let object of store.selectedDataContent; let i = index\">\n\n            <div id=\"sc-selected-property\" *ngIf=\"object.type === undefined\">\n              <div class=\"sc-selected-object-thumbnail-wrapper\">\n                <img class=\"sc-selected-object-thumbnail\" src=\"{{object.adpicture.href}}\">  <!--.href-->\n              </div>\n\n              <div class=\"sc-selected-object-metadata\">\n                <label>\n                  {{object.address.geoHierarchy.city.name}}\n                  {{object.address.geoHierarchy.quarter.name}}\n                  {{object.address.geoHierarchy.region.name}}\n                </label>\n                <label class=\"sc-sub\">\n                  <span id=\"price\">{{object.pricem2}} &euro; m<sup>2</sup></span>\n                  <!-- <span id=\"currency\">{{object.price.currency}}</span>-->\n                </label>\n                <div class=\"btn-card-thumbnail-delete\">\n                  <i class=\"fa fa-times\" (click)=\"removeObject(i)\"></i>\n                </div>\n              </div>\n            </div>\n\n            <div id=\"sc-selected-custom\">\n              <div class=\"sc-selected-object-thumbnail-wrapper\" *ngIf=\"object.type === 'logo'\">\n                <img class=\"sc-selected-object-thumbnail\" src=\"{{object.picture}}\">\n                <div class=\"sc-selected-object-metadata link\">\n                  <!--Set char limit 150, hovering will show title, aka full URL path-->\n                  <label class=\"sc-selected-object-metadata-link\" title=\"{{object.url}}\"\n                         id=\"url\">Link: {{object.url}}</label>\n                  <div class=\"btn-card-thumbnail-delete\">\n                    <i class=\"fa fa-times\" (click)=\"removeObject(i)\"></i>\n                  </div>\n                </div>\n              </div>\n            </div>\n\n          </div>\n        </div>\n      </div>\n      <!-- END SELECTED OBJECTS -->\n\n\n    </div>\n    <!--END PREVIEW SIDEBAR-->\n\n\n  </div>\n  <!--END COL-MD-12-->\n\n\n</div>\n<div *ngIf=\"store.showLoadingIcon\">\n  <img style=\"position: fixed; top: 50%; left: 60%; transform: translate(-50%, -50%);\"\n       src=\"./img/ripple-load.gif\"/>\n</div>\n"
 
 /***/ }),
 

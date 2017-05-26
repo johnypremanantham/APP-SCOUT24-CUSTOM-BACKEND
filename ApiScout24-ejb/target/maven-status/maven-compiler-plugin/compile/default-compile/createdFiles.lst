@@ -5,6 +5,7 @@ com\adssets\facades\MarketFacadeLocal.class
 com\adssets\model\Market.class
 com\adssets\facades\FeedFacade.class
 com\adssets\model\User_.class
+com\adssets\api\Scout24$1.class
 com\adssets\model\Publisher.class
 com\adssets\model\Market_.class
 com\adssets\api\Scout24.class

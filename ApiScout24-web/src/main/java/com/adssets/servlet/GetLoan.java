@@ -5,10 +5,7 @@
  */
 package com.adssets.servlet;
 
-import com.adssets.ejb.DataAccessLocal;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import java.io.BufferedReader;
+import com.adssets.api.Scout24Local;
 import java.io.IOException;
 import java.io.PrintWriter;
 import javax.ejb.EJB;
@@ -22,12 +19,13 @@ import javax.servlet.http.HttpServletResponse;
  *
  * @author adssets
  */
-@WebServlet(name = "FeedServlet", urlPatterns = {"/FeedServlet"})
-public class FeedServlet extends HttpServlet {
+@WebServlet(name = "GetLoan", urlPatterns = {"/GetLoan"})
+public class GetLoan extends HttpServlet {
 
+    
     @EJB
-    private DataAccessLocal data;
-
+    private Scout24Local scout24;
+    
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
      * methods.
@@ -37,20 +35,20 @@ public class FeedServlet extends HttpServlet {
      * @throws ServletException if a servlet-specific error occurs
      * @throws IOException if an I/O error occurs
      */
-    
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        response.setContentType("text/html;charset=UTF-8");
+        response.setContentType("text/json;charset=UTF-8");
         response.setHeader("Access-Control-Allow-Origin", "*");
-        try (PrintWriter out = response.getWriter()) {
-           String marketId = request.getParameter("marketId");
-           String lazyLoad = request.getParameter("lazyLoad");
-           if(lazyLoad == null){
-           lazyLoad = "no";
-           }
-           out.println(data.buildFeedForMarket(marketId, lazyLoad));
+       
+        String postalcode = request.getParameter("postalcode");
+        String suburb = request.getParameter("suburb");
 
+            
+        try (PrintWriter out = response.getWriter()) {
+            out.println(scout24.getLoans(postalcode, suburb));
         }
+
+
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
@@ -79,34 +77,7 @@ public class FeedServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        response.setHeader("Access-Control-Allow-Origin", "*");
-//        try (PrintWriter out = response.getWriter()) {
-//        StringBuilder sb = new StringBuilder();
-//            String line = null;
-//            try {
-//                BufferedReader reader = request.getReader();
-//                while ((line = reader.readLine()) != null)
-//                    sb.append(line);
-//            } catch (Exception e) { 
-//                System.out.println("com.adssets.servlet.ObjectServlet.processRequestPost()" + " Could not read POST body"); 
-//            }
-//            
-//            JsonObject jsonObject = (new JsonParser()).parse(sb.toString()).getAsJsonObject();
-//            
-//            if(jsonObject.has("marketId") && jsonObject.has("json")){
-//                System.out.println(jsonObject.toString());
-//                String res = data.createFeed(jsonObject.toString());
-//                out.println(res);
-//            }else{
-//              System.out.println("com.adssets.servlet.ObjectServlet.processRequestPost()" + " Missing fields in body"); 
-//
-//            }
-//            
-//            
-//            
-//           
-//            
-//        }
+        processRequest(request, response);
     }
 
     /**
