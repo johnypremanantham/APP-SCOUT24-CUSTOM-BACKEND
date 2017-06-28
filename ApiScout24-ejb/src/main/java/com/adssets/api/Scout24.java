@@ -202,8 +202,10 @@ public class Scout24 implements Scout24Local {
             }
 
         } catch (Exception e) {
+            System.out.println("-------REMOVE OBJECT------");
 
             e.printStackTrace();
+            return "{\"error\":1}";
 
         }
 
@@ -326,10 +328,17 @@ public class Scout24 implements Scout24Local {
                 int valB;
 
                 try {
-                    valA = (Integer) a.get(KEY_NAME).getAsInt();
-                    valB = (Integer) b.get(KEY_NAME).getAsInt();
-                    return valA - valB;
+                    if(!a.get(KEY_NAME).isJsonNull() && !b.get(KEY_NAME).isJsonNull()){
+                       valA = (Integer) a.get(KEY_NAME).getAsInt();
+                       valB = (Integer) b.get(KEY_NAME).getAsInt();
+                       return valA - valB; 
+                    }else{
+                        return -1;
+                    }
+                    
                 } catch (Exception e) {
+                    System.err.println(a);
+                    System.err.println(b);
                     System.err.println(e);
                 }
                 return -1;

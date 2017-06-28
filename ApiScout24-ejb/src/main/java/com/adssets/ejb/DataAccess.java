@@ -140,7 +140,7 @@ public class DataAccess implements DataAccessLocal {
         JsonObject jsonObj = new JsonObject();
         
         if(feedCheck == null) { 
-        feedFacade.create(feed);
+            feedFacade.create(feed);
             jsonObj.addProperty("id", feed.getId());
             jsonObj.addProperty("marketId", feed.getIdmarket().getId());
             jsonObj.addProperty("json", feed.getJson());
@@ -197,6 +197,7 @@ public class DataAccess implements DataAccessLocal {
             //CHANGE ADPICTURE TO THE PICTURE STORED IN THE DATABASE
             if(value.equals("object")){
             String result = scout24.getApartments(objElmParsed.get("objectid").getAsString());
+            if(!result.equals("{\"error\":1}")){
             JsonObject resultObj = parser.parse(result).getAsJsonObject();
             String link = "{\"link\": \"https://www.immobilienscout24.de/expose/"+objElmParsed.get("objectid").getAsInt()+"?referrer=\"}";
             JsonObject clickLink = parser.parse(link).getAsJsonObject();
@@ -211,9 +212,10 @@ public class DataAccess implements DataAccessLocal {
             if(lazyLoad.equals("yes")){
                resultObj.remove("allpictures");
             }
-            
-            
+
             objData.add(resultObj);
+            }
+            
             }else{
                 objData.add(objId);
             }

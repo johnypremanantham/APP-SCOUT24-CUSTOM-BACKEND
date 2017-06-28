@@ -1150,6 +1150,8 @@ var GetcontentComponent = (function () {
         this.showFilesizeError = false;
         var _localThis = this;
         var isInt = parseInt(this.store.objectId);
+        console.log(this.store.objectId + "|");
+        console.log(isInt);
         if (this.store.objectId !== "" && this.store.objectId !== undefined && isInt) {
             this.json.getJSON(this.store.serverName + '/GetApartment?objectId=' + this.store.objectId)
                 .subscribe(function (response) {
@@ -1192,7 +1194,7 @@ var GetcontentComponent = (function () {
         var obj = {
             "type": "object",
             "url": img.replace(this.tileWidth, "%WIDTH%").replace(this.tileHeight, "%HEIGHT%"),
-            "objectid": this.store.objectId
+            "objectid": this.store.objectId.trim()
         };
         /* this.store.selectedObjects.push(parseInt(this.store.objectId));*/
         // Push obj, img should not have width height replaced when pushed
